@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+        <title>Cowin Alert</title>
+        <link rel = "icon" href="static/image/logo.png" type = "image/x-icon">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+    </head>
+
+<body>
+<div class="container">
+<!--added from here-->
+    <div class="form-group">
+        <div id="clock" class="form-check form-check-inline float-left"></div>
+        <div id="refresh" class="form-check form-check-inline float-right"></div>
+        <textarea id="txtConvHistory" class="form-control" rows="10"></textarea>
+    </div> 
+<!--added to here-->
+    <div class="form-group">
+        <label >Audio:</label>
+        <div class="form-check form-check-inline float-right">
+            <input type="checkbox" id="chkUseSpeechSyn" class="form-check-input" checked="checked" />
+            <label for="chkUseSpeechSyn" class="form-check-label">Voice</label>
+        </div>
+        <form method="POST">
+            <!--{{form.csrf_token}}-->
+            <fieldset id="stopfield">
+            <div class="form_group">
+                <label for="email">State:</label>
+                {{form.state(class="form-control")}}
+            </div>
+            <div class="form_group">
+                <label for="email">District:</label>
+                {{form.district(class="form-control")}}
+            </div>
+            <div class="form-check form-check-inline float-left">
+                <input type="checkbox" id="chkUse18" class="form-check-input" checked/>
+                <label for="chkUse18" class="form-check-label">Age 18+</label>
+            </div>
+            <div class="form-check form-check-inline float-left">
+                <input type="checkbox" id="chkUse45" class="form-check-input" />
+                <label for="chkUse45" class="form-check-label">Age 45+</label>
+            </div>
+            <div class="form-check form-check-inline float-right">
+                <input type="checkbox" id="chkUsefree" class="form-check-input" disabled checked/>
+                <label for="chkUsefree" class="form-check-label">Free</label>
+            </div>
+            <div class="form-check form-check-inline float-right">
+                <input type="checkbox" id="chkUsepaid" class="form-check-input" disabled/>
+                <label for="chkUsepaid" class="form-check-label">Paid</label>
+            </div>
+            <br>
+            <fieldset id="stopstart" disabled>
+            <button class="btn btn-primary btn-sm btn-block mt-2" id="btnSay">Start</button>
+            </fieldset>
+            </fieldset>
+            <button class="btn btn-primary btn-sm btn-block mt-2" onClick="window.location.href=window.location.href">Reset / Stop / Edit</button>
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var samay="sada";
+    setInterval(displayclock,500);
+    displayclock();
+    function displayclock(){
+        var time=new Date();
+        var hrs=time.getHours();
+        var min=time.getMinutes();
+        var sec=time.getSeconds();
+        var en='AM';
+        if(hrs>12){en='PM';};
+        if(hrs>12){hrs=hrs-12;};
+        if(hrs==0){hrs=12;};
+        if(hrs<10){hrs='0'+hrs;};
+        if(min<10){min='0'+min;};
+        if(sec<10){sec='0'+sec;};
+        samay=hrs+":"+min+":"+sec+' '+en;
+        document.getElementById('clock').innerHTML=samay;
+    }
+    var number=60;
+    var above18 = $("#chkUse18").is(":checked");
+    var above45 = $("#chkUse45").is(":checked");
+    var txtConvHistory = $("#txtConvHistory");
+    var convHistory = txtConvHistory.val();
+    var last=0;
+    setInterval(countdown,1000);
+    function countdown(){
+        number--;
+        if(number>=0){
+            document.getElementById('refresh').innerHTML=number;
+        }
+        if(number==-1){
+            number=61;
+            var dose1=0;
+            var dose2=0;
+            var total=0;
+            var foundnew=0;
+            var v1=0;
+            var v2=0;
+            var v3=0;
+            var vaccine="vaccine";
+            if (document.getElementById("stopfield").disabled==true){
+                fetch('/api/v1/'+district+'/'+above18+'/'+above45).then(function(response){
+                    response.json().then(function(data){
+                    
+                    for (available of data.centeravailability){
+                        dose1+=available.available_capacity_dose1;
+                        dose2+=available.available_capacity_dose2;
+                        total+=1;
+                        vaccine=available.vaccine;
+                        if (available.vaccine=="COVISHIELD"){
+                            if (v1==0){
+                                if (vaccine!="COVISHIELD"){
+                                    v1=1;
+                                    vaccine+=" and "+available.vaccine;
+                        }}
+                        }
+                        if (available.vaccine=="COVAXIN"){
+                            if (v2==0){
+                                if (vaccine!="COVAXIN"){
+                                    v2=1;
+                                    vaccine+=" and "+available.vaccine;
+                        }}
+                        }
+                        if (available.vaccine=="SPUTNIK V"){
+                            if (v3==0){
+                                if (vaccine!="SPUTNIK V"){
+                                    v3=1;
+                                    vaccine+=" and "+available.vaccine;
+                        }}
+                        }
+                    }
+                    convHistory = convHistory + "Availablity: Total "+dose1+" dose 1 and "+dose2+" dose 2 of "+vaccine+" in "+total+" Centers available today right now.("+samay+")\n(It will give voice alert when new dose arrive.)\n\n";
+                    if(last<(dose1+dose2)){
+                    foundnew=dose1+dose2-last;
+                    var speechSyn = $("#chkUseSpeechSyn").is(":checked");
+                    if (speechSyn) {
+                    speak("Found "+foundnew+" new doses");
+                    }}
+                    last=dose1+dose2;
+                    dose1=0;
+                    dose2=0;
+                    total=0;
+                    v1=0;
+                    v2=0;
+                    v3=0;
+                    vaccine="abc";
+                    txtConvHistory.val(convHistory);
+                    txtConvHistory.scrollTop(txtConvHistory[0].scrollHeight);
+                    
+                    });
+                });
+            }
+        }
+    }
+</script>
+
+<script>
+state_select = document.getElementById('state');
+district_select = document.getElementById('district');
+
+state_select.onchange = function(){
+    state = state_select.value;
+    <!--alert(state);-->
+    var speechSyn = $("#chkUseSpeechSyn").is(":checked");
+    if (speechSyn) {
+        speak(state);
+    }
+    
+    if (state_select.value){
+    fetch('/api/v1/'+state).then(function(response){
+        response.json().then(function(data){
+            var optionHTML = '';
+            optionHTML += '<option disabled selected>Select Districts</option>';
+            for (district of data.districtstate){
+                optionHTML += district.code;
+            }
+<!--
+            for (var i = 0; i < data.length; i++){
+            var obj = data[i];
+            for (var key in obj){
+            var value = obj[key];
+            optionHTML += '<option value='+key+'>'+value+'</option>';
+            }
+            }
+-->
+            district_select.innerHTML = optionHTML;
+        });
+    });
+}
+}
+district_select.onchange = function(){
+    district = district_select.value;
+    <!--alert(district);-->
+    var speechSyn = $("#chkUseSpeechSyn").is(":checked");
+    if (speechSyn) {
+        speak('district code '+district);
+    }
+    document.getElementById("stopstart").disabled = false;
+}
+</script>
+
+<script type="text/javascript">
+            var txtConvHistory = $("#txtConvHistory");
+            var convHistory = txtConvHistory.val();
+            function say(){
+                var above18 = $("#chkUse18").is(":checked");
+                var above45 = $("#chkUse45").is(":checked");
+                var paid = $("#chkUsepaid").is(":checked");
+                var free = $("#chkUsefree").is(":checked");
+                var speechSyn = $("#chkUseSpeechSyn").is(":checked");
+                if (speechSyn) {
+                    speak('Searching in '+state+district);
+                }
+                convHistory = convHistory + "> State: "+state+"\n";
+                convHistory = convHistory + "> District Code: "+district+"\n";
+                convHistory = convHistory + "> 18+: "+above18+", 45+: "+above45+", Paid: "+paid+", Free: "+free+".("+samay+")\n";
+                convHistory = convHistory + "(It will give voice alert when new dose arrive.)\n\n";
+                if (speechSyn) {
+                    speak("It will give voice alert when new dose arrive.");
+                }
+                txtConvHistory.val(convHistory);
+                txtConvHistory.scrollTop(txtConvHistory[0].scrollHeight);
+                document.getElementById("stopfield").disabled = true;
+            }
+
+            $("#btnSay").click(function() {
+                document.getElementById("stopfield").disabled = false;
+                say();
+            })
+</script>
+
+<script type="text/javascript">
+            var synth = window.speechSynthesis;
+
+            function speak(txt) {
+                var utterance = new SpeechSynthesisUtterance(txt);
+                utterance.onstart = function(event) {
+                    var speechRec = $("#chkUseSpeechRec").is(":checked");
+                    if (speechRec) {
+                        console.info("stopping rec...");
+                        startButton("txtQuestion", false);
+                    }
+                }
+                utterance.onend = function(event) {
+                    var speechRec = $("#chkUseSpeechRec").is(":checked");
+                    if (speechRec) {
+                        console.info("starting rec...");
+                        startButton("txtQuestion", true);
+                    }
+                }
+
+                var voices = synth.getVoices();
+                utterance.voice = voices[2];
+
+                synth.speak(utterance);
+            }
+
+</script>
+
+</body>
+</html>
