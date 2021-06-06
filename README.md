@@ -1,1 +1,1 @@
-# cowinvaccinationalert
+# Cowin Vaccination Alert Web APP
