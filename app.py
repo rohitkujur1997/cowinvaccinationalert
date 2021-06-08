@@ -37,13 +37,14 @@ def districtbystate(get_district):
     for i in range(len(d)):
         #print(d[i]['district_name'])
         districtObj={}
+        '''
         districtObj['code']='<option value='+str(d[i]['district_id'])+'>'+d[i]['district_name']+'</option>'
         '''
         districtObj['id']=d[i]['district_id']
         districtObj['districtname']=d[i]['district_name']
         districtObj['statename']=get_district
         districtObj['stateid']=state_id
-        '''
+        ''''''
         districtArray.append(districtObj)
     return jsonify({'districtstate': districtArray})
 
