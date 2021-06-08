@@ -176,7 +176,7 @@ state_select.onchange = function(){
             var optionHTML = '';
             optionHTML += '<option disabled selected>Select Districts</option>';
             for (district of data.districtstate){
-                optionHTML += district.code;
+                optionHTML += '<option value="'+district.id+'">'+district.districtname+'</option>';
             }
 <!--
             for (var i = 0; i < data.length; i++){
