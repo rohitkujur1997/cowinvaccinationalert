@@ -8,6 +8,8 @@ It uses [COWIN API](https://apisetu.gov.in/public/marketplace/api/cowin) provide
 ## Javascript
 ## HTML
 
+# Demo
+https://user-images.githubusercontent.com/40846590/121170460-de84bc80-c872-11eb-9a8f-36ae2c35fc73.mp4
 
 # Usage
 Internet is must
