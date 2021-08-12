@@ -8,6 +8,8 @@ It uses [COWIN API](https://apisetu.gov.in/public/marketplace/api/cowin) provide
 ## Javascript
 ## HTML
 
+# I have deployed this webapp it in heroku. Click [here](https://cowinvaccinationalert.herokuapp.com/) to see. {Note- It can may  take some seconds for opening at starting as server is in sleep mode when there is no use}
+
 # Demo (make sure you enabled audio)
 https://user-images.githubusercontent.com/40846590/121170460-de84bc80-c872-11eb-9a8f-36ae2c35fc73.mp4
 
